@@ -157,7 +157,7 @@ agent = client.agents.create(
         {"label": "user_reminders", "value": "", "limit": 8000},
         {"label": "user_preferences", "value": "", "limit": 8000},
     ],
-    model="anthropic/claude-3-7-sonnet-20250219",
+    model="anthropic/claude-sonnet-4-5-20250929",
     embedding="openai/text-embedding-ada-002",
     include_base_tools=False,
     tool_ids=[escalate_user_request_tool.id, clarify_user_request_tool.id, handle_orchestrator_message_tool.id],

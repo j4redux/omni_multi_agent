@@ -10,7 +10,7 @@ Complete guide to get the Omni Multi-Agent System running on your local machine.
 - **Git**: For cloning the repository
 
 ### Required API Keys
-1. **Anthropic API Key**: For Claude 3.7 Sonnet
+1. **Anthropic API Key**: For Claude Sonnet 4.5
    - Sign up at: https://console.anthropic.com/
    - Create API key in Settings → API Keys
    

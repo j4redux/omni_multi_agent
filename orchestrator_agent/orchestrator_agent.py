@@ -252,7 +252,7 @@ if tool_registration_success:
                 {"label": "orchestrator_plan", "value": "", "limit": 15000},
                 {"label": "requests_changelog", "value": "", "limit": 15000},
             ],
-            model="anthropic/claude-3-7-sonnet-20250219",
+            model="anthropic/claude-sonnet-4-5-20250929",
             embedding="openai/text-embedding-ada-002",
             include_base_tools=False,
             message_buffer_autoclear=True,

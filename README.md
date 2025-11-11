@@ -3,11 +3,11 @@
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Letta](https://img.shields.io/badge/Framework-Letta-purple.svg)](https://github.com/letta-ai/letta)
-[![Claude 3.7 Sonnet](https://img.shields.io/badge/LLM-Claude%203.7%20Sonnet-orange.svg)](https://www.anthropic.com/claude)
+[![Claude Sonnet 4.5](https://img.shields.io/badge/LLM-Claude%20Sonnet%204.5-orange.svg)](https://www.anthropic.com/claude)
 
 A sophisticated multi-agent orchestration system built with the [Letta framework](https://github.com/letta-ai/letta), demonstrating advanced agent engineering patterns and hierarchical task delegation.
 
-## 🎯 Overview
+## Overview
 
 This project showcases a production-ready multi-agent architecture where specialized agents collaborate to handle complex user requests. The system features:
 
@@ -16,7 +16,7 @@ This project showcases a production-ready multi-agent architecture where special
 - **Tool-Based Workflows**: Custom tools with enforced execution patterns
 - **Agent Specialization**: Dedicated agents for conversations, tasks, projects, and preferences
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -89,13 +89,13 @@ This project showcases a production-ready multi-agent architecture where special
   - `update_preferences_changelog`: Log preference changes
   - `send_orchestrator_message`: Report completion
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
 - Python 3.11 or higher
 - [Letta](https://github.com/letta-ai/letta) server running locally
-- Anthropic API key (for Claude 3.7 Sonnet)
+- Anthropic API key (for Claude Sonnet 4.5)
 - OpenAI API key (for embeddings)
 
 ### Installation
@@ -193,7 +193,7 @@ client.agents.messages.create_async(
 
 All state-modifying agents maintain changelogs for auditability and debugging.
 
-## 🧪 Example Workflows
+## Example Workflows
 
 ### Simple Task Creation
 ```
@@ -216,7 +216,7 @@ User: "Create a new project for the website redesign and add 3 initial tasks"
   → Report completion to user
 ```
 
-## 📊 Memory Block Reference
+## Memory Block Reference
 
 | Agent           | Block Name           | Access | Size  | Purpose                    |
 |-----------------|---------------------|--------|-------|----------------------------|
@@ -232,12 +232,12 @@ User: "Create a new project for the website redesign and add 3 initial tasks"
 | Preferences     | user_preferences    | R/W    | 8000  | User preferences storage   |
 | Preferences     | preferences_changelog| R/W   | 8000  | Preference change history  |
 
-## 🔧 Configuration
+## Configuration
 
 ### Model Configuration
 
 All agents use:
-- **LLM**: `anthropic/claude-3-7-sonnet-20250219`
+- **LLM**: `anthropic/claude-sonnet-4-5-20250929`
 - **Embeddings**: `openai/text-embedding-ada-002`
 - **Base Tools**: Disabled (custom tools only)
 - **Message Buffer**: Auto-clear enabled
@@ -255,7 +255,7 @@ After creating agents, update these references:
 3. In `orchestrator_agent/orchestrator_agent.py`:
    - In `delegate_agent_request` function: Update the `agent_ids` dictionary
 
-## 🎯 Design Decisions
+## Design Decisions
 
 ### Why Letta?
 Letta provides:
@@ -276,7 +276,7 @@ Tool rules enforce deterministic workflows and prevent common pitfalls:
 - Prevents infinite loops
 - Makes agent behavior predictable and testable
 
-## 📝 Future Enhancements
+## Future Enhancements
 
 - [ ] Add Reminders Agent for time-based tasks
 - [ ] Implement Calendar Agent for scheduling
@@ -287,21 +287,10 @@ Tool rules enforce deterministic workflows and prevent common pitfalls:
 - [ ] Add vector search for semantic task/project lookup
 - [ ] Create deployment guide (Docker, K8s)
 
-## 🤝 Contributing
-
-This is a portfolio project demonstrating agent engineering skills. Feedback and suggestions are welcome!
-
-## 📄 License
+## License
 
 MIT License - feel free to use this as a reference for your own agent systems.
 
-## 👤 Author
-
-**Johnny Heo**
-- Portfolio: [Your Portfolio URL]
-- LinkedIn: [Your LinkedIn URL]
-- Email: [Your Email]
-
 ---
 
-**Built with**: [Letta](https://github.com/letta-ai/letta) | [Claude 3.7 Sonnet](https://www.anthropic.com/claude) | Python 3.13
+**Built with**: [Letta](https://github.com/letta-ai/letta) | [Claude Sonnet 4.5](https://www.anthropic.com/claude) | Python 3.13

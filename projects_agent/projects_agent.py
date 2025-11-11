@@ -191,7 +191,7 @@ if tool_registration_success:
                 {"label": "projects_changelog", "value": "", "limit": 8000}
             ],
             block_ids=["block-efbdcff0-d0c7-42f7-9ba5-ca8d9000f5c4"],
-            model="anthropic/claude-3-7-sonnet-20250219",
+            model="anthropic/claude-sonnet-4-5-20250929",
             embedding="openai/text-embedding-ada-002",
             include_base_tools=False,
             message_buffer_autoclear=True,

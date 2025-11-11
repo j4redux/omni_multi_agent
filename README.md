@@ -1,5 +1,10 @@
 # Omni Multi-Agent System
 
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Letta](https://img.shields.io/badge/Framework-Letta-purple.svg)](https://github.com/letta-ai/letta)
+[![Claude 3.7 Sonnet](https://img.shields.io/badge/LLM-Claude%203.7%20Sonnet-orange.svg)](https://www.anthropic.com/claude)
+
 A sophisticated multi-agent orchestration system built with the [Letta framework](https://github.com/letta-ai/letta), demonstrating advanced agent engineering patterns and hierarchical task delegation.
 
 ## 🎯 Overview

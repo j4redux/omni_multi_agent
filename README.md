@@ -150,7 +150,7 @@ python conversational_agent/conversational_agent.py
 
 **Important**: Note the agent IDs printed during creation and update them in the respective files where agents reference each other.
 
-## 🎓 Key Design Patterns
+## Key Design Patterns
 
 ### 1. Tool Rules for Workflow Enforcement
 

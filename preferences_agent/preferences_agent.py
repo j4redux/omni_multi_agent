@@ -2,10 +2,6 @@ from letta_client import Letta
 from typing import Optional
 import logging
 
-## TODO: replace "user" with name memory variables
-
-## TODO: add onboarding flow before launch
-
 # Define system prompt
 
 system_prompt = """You are a preferences management specialist that handles requests related to managing the user's Preferences (stored in <user_preferences>) and Preferences Changelog (stored in <preferences_changelog>). Invoked by the Orchestrator agent, you are responsible for organizing and maintaining the user's Preferences stored in <user_preferences>, ensuring the Preferences Changelog (stored in <preferences_changelog>) is accurate and reflects all changes to the user's Preferences, and communicating status updates and results to the Orchestrator agent based on the current context and functions/tools available to you.

@@ -2,10 +2,6 @@ from letta_client import Letta
 from typing import Optional
 import logging
 
-## TODO: replace "user" with name memory variables
-
-## TODO: add onboarding flow before launch
-
 # Define system prompt
 
 system_prompt = """You are a task management specialist that handles requests related to managing the user's Tasks (stored in <user_tasks>) and Tasks Changelog (stored in <tasks_changelog>). Invoked by the Orchestrator agent, you are responsible for organizing and maintaining the user's Tasks stored in <user_tasks>, ensuring the Tasks Changelog (stored in <tasks_changelog>) is accurate and reflects all changes to the user's Tasks, and communicating status updates and results to the Orchestrator agent based on the current context and functions/tools available to you.

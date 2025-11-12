@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  # Letta Server
+  letta-server:
+    image: letta/letta:latest
+    container_name: omni-letta-server
+    ports:
+      - "8283:8283"
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - LETTA_SERVER_HOST=0.0.0.0
+      - LETTA_SERVER_PORT=8283
+    volumes:
+      - letta-data:/root/.letta
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8283/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - omni-network
+
+  # Agent Initializer (runs once to create agents)
+  agent-initializer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: omni-agent-initializer
+    depends_on:
+      letta-server:
+        condition: service_healthy
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - LETTA_SERVER_URL=http://letta-server:8283
+    volumes:
+      - ./scripts:/app/scripts
+      - agent-config:/app/config
+    command: python scripts/initialize_agents.py
+    networks:
+      - omni-network
+
+  # Conversational Agent Service (keeps running)
+  conversational-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: omni-conversational-agent
+    depends_on:
+      - letta-server
+      - agent-initializer
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - LETTA_SERVER_URL=http://letta-server:8283
+      - CONVERSATIONAL_AGENT_ID=${CONVERSATIONAL_AGENT_ID}
+    volumes:
+      - ./examples:/app/examples
+      - agent-config:/app/config:ro
+    command: tail -f /dev/null  # Keep container running for interaction
+    restart: unless-stopped
+    networks:
+      - omni-network
+
+volumes:
+  letta-data:
+    driver: local
+  agent-config:
+    driver: local
+
+networks:
+  omni-network:
+    driver: bridge

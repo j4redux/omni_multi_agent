@@ -163,3 +163,180 @@ REQUEST_TIMEOUT=60
 ---
 
 *To be continued in subsequent tasks...*
+
+## AWS Deployment
+
+### Prerequisites
+
+- AWS CLI configured with appropriate credentials
+- Terraform 1.0+ installed
+- Docker image pushed to Amazon ECR
+- Anthropic and OpenAI API keys
+
+### Deployment Options
+
+#### Option 1: ECS Fargate (Recommended for Serverless)
+
+**Advantages:**
+- No server management
+- Auto-scaling
+- Pay-per-use pricing
+- High availability
+
+**Steps:**
+
+1. **Create infrastructure with Terraform**
+   
+   ```bash
+   cd infrastructure/aws/terraform
+   
+   # Initialize Terraform
+   terraform init
+   
+   # Review plan
+   terraform plan -var="environment=prod"
+   
+   # Apply configuration
+   terraform apply -var="environment=prod"
+   ```
+
+2. **Store API keys in Secrets Manager**
+   
+   ```bash
+   # Store Anthropic API key
+   aws secretsmanager put-secret-value \
+     --secret-id omni/anthropic-key-prod \
+     --secret-string "sk-ant-xxxxxxxxxxxxxxxxxxxx"
+   
+   # Store OpenAI API key
+   aws secretsmanager put-secret-value \
+     --secret-id omni/openai-key-prod \
+     --secret-string "sk-xxxxxxxxxxxxxxxxxxxx"
+   ```
+
+3. **Build and push Docker image to ECR**
+   
+   ```bash
+   # Get AWS account ID
+   AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+   AWS_REGION="us-east-1"
+   
+   # Create ECR repository
+   aws ecr create-repository \
+     --repository-name omni-multi-agent \
+     --region $AWS_REGION
+   
+   # Login to ECR
+   aws ecr get-login-password --region $AWS_REGION | \
+     docker login --username AWS --password-stdin \
+     $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+   
+   # Build and tag image
+   docker build -t omni-multi-agent:latest .
+   docker tag omni-multi-agent:latest \
+     $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/omni-multi-agent:latest
+   
+   # Push to ECR
+   docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/omni-multi-agent:latest
+   ```
+
+4. **Update ECS task definition with your account ID**
+   
+   ```bash
+   # Update placeholders in ecs-task-definition.json
+   sed -i "s/ACCOUNT_ID/$AWS_ACCOUNT_ID/g" infrastructure/aws/ecs-task-definition.json
+   sed -i "s/REGION/$AWS_REGION/g" infrastructure/aws/ecs-task-definition.json
+   
+   # Get EFS ID from Terraform output
+   EFS_ID=$(terraform output -raw efs_id)
+   sed -i "s/fs-XXXXXXXXX/$EFS_ID/g" infrastructure/aws/ecs-task-definition.json
+   ```
+
+5. **Register task definition**
+   
+   ```bash
+   aws ecs register-task-definition \
+     --cli-input-json file://infrastructure/aws/ecs-task-definition.json
+   ```
+
+6. **Create ECS service**
+   
+   ```bash
+   CLUSTER_NAME=$(terraform output -raw cluster_name)
+   
+   aws ecs create-service \
+     --cluster $CLUSTER_NAME \
+     --service-name omni-service \
+     --task-definition omni-multi-agent \
+     --desired-count 1 \
+     --launch-type FARGATE \
+     --network-configuration "awsvpcConfiguration={subnets=[subnet-xxx,subnet-yyy],securityGroups=[sg-xxx],assignPublicIp=DISABLED}"
+   ```
+
+7. **Verify deployment**
+   
+   ```bash
+   # Check service status
+   aws ecs describe-services \
+     --cluster $CLUSTER_NAME \
+     --services omni-service
+   
+   # View logs
+   aws logs tail /ecs/omni-multi-agent-prod --follow
+   ```
+
+#### Option 2: EKS (Elastic Kubernetes Service)
+
+For Kubernetes-based deployment, see [Kubernetes Deployment](#kubernetes-deployment) section.
+
+### Cost Estimation
+
+**Monthly costs for production deployment (us-east-1):**
+
+| Service | Configuration | Monthly Cost (USD) |
+|---------|--------------|-------------------|
+| ECS Fargate | 2 vCPU, 4GB RAM, 24/7 | ~$100 |
+| EFS | 10GB storage | ~$3 |
+| CloudWatch Logs | 5GB ingestion, 30 day retention | ~$3 |
+| NAT Gateway | 2 AZs, 100GB data | ~$70 |
+| Secrets Manager | 3 secrets | ~$1.20 |
+| **Total** | | **~$177/month** |
+
+**Cost optimization tips:**
+- Use Fargate Spot for non-production (70% savings)
+- Implement auto-scaling based on demand
+- Use VPC endpoints to avoid NAT Gateway costs
+- Set up log filtering to reduce CloudWatch costs
+
+### Monitoring
+
+AWS provides built-in monitoring through:
+
+1. **CloudWatch Container Insights**
+   - CPU/Memory utilization
+   - Network metrics
+   - Task count
+
+2. **CloudWatch Logs**
+   - Application logs
+   - Error tracking
+   - Search and filter
+
+3. **AWS X-Ray** (optional)
+   - Distributed tracing
+   - Performance analysis
+
+**View metrics:**
+```bash
+# CPU utilization
+aws cloudwatch get-metric-statistics \
+  --namespace AWS/ECS \
+  --metric-name CPUUtilization \
+  --dimensions Name=ServiceName,Value=omni-service \
+  --start-time 2024-01-01T00:00:00Z \
+  --end-time 2024-01-01T23:59:59Z \
+  --period 3600 \
+  --statistics Average
+```
+
+---

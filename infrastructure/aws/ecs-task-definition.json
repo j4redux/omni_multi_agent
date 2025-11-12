@@ -1,0 +1,115 @@
+{
+  "family": "omni-multi-agent",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "2048",
+  "memory": "4096",
+  "executionRoleArn": "arn:aws:iam::ACCOUNT_ID:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::ACCOUNT_ID:role/omniAgentTaskRole",
+  "containerDefinitions": [
+    {
+      "name": "letta-server",
+      "image": "letta/letta:latest",
+      "portMappings": [
+        {
+          "containerPort": 8283,
+          "protocol": "tcp"
+        }
+      ],
+      "essential": true,
+      "environment": [
+        {
+          "name": "LETTA_SERVER_HOST",
+          "value": "0.0.0.0"
+        },
+        {
+          "name": "LETTA_SERVER_PORT",
+          "value": "8283"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "ANTHROPIC_API_KEY",
+          "valueFrom": "arn:aws:secretsmanager:REGION:ACCOUNT_ID:secret:omni/anthropic-key"
+        },
+        {
+          "name": "OPENAI_API_KEY",
+          "valueFrom": "arn:aws:secretsmanager:REGION:ACCOUNT_ID:secret:omni/openai-key"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/omni-multi-agent",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "letta"
+        }
+      },
+      "healthCheck": {
+        "command": ["CMD-SHELL", "curl -f http://localhost:8283/v1/health || exit 1"],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 60
+      },
+      "mountPoints": [
+        {
+          "sourceVolume": "letta-data",
+          "containerPath": "/root/.letta",
+          "readOnly": false
+        }
+      ]
+    },
+    {
+      "name": "conversational-agent",
+      "image": "ACCOUNT_ID.dkr.ecr.REGION.amazonaws.com/omni-multi-agent:latest",
+      "essential": false,
+      "dependsOn": [
+        {
+          "containerName": "letta-server",
+          "condition": "HEALTHY"
+        }
+      ],
+      "environment": [
+        {
+          "name": "LETTA_SERVER_URL",
+          "value": "http://localhost:8283"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "ANTHROPIC_API_KEY",
+          "valueFrom": "arn:aws:secretsmanager:REGION:ACCOUNT_ID:secret:omni/anthropic-key"
+        },
+        {
+          "name": "OPENAI_API_KEY",
+          "valueFrom": "arn:aws:secretsmanager:REGION:ACCOUNT_ID:secret:omni/openai-key"
+        },
+        {
+          "name": "CONVERSATIONAL_AGENT_ID",
+          "valueFrom": "arn:aws:secretsmanager:REGION:ACCOUNT_ID:secret:omni/agent-ids:conversational_agent_id"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/omni-multi-agent",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "agent"
+        }
+      }
+    }
+  ],
+  "volumes": [
+    {
+      "name": "letta-data",
+      "efsVolumeConfiguration": {
+        "fileSystemId": "fs-XXXXXXXXX",
+        "transitEncryption": "ENABLED",
+        "authorizationConfig": {
+          "iam": "ENABLED"
+        }
+      }
+    }
+  ]
+}

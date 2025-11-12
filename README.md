@@ -1,7 +1,7 @@
 # Omni Multi-Agent System
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: CC BY-NC-ND 4.0](https://img.shields.io/badge/License-CC%20BY--NC--ND%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-nd/4.0/)
 [![Letta](https://img.shields.io/badge/Framework-Letta-purple.svg)](https://github.com/letta-ai/letta)
 [![Claude Sonnet 4.5](https://img.shields.io/badge/LLM-Claude%20Sonnet%204.5-orange.svg)](https://www.anthropic.com/claude)
 
@@ -289,7 +289,9 @@ Tool rules enforce deterministic workflows and prevent common pitfalls:
 
 ## License
 
-MIT License - feel free to use this as a reference for your own agent systems.
+This work is licensed under a [Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License](https://creativecommons.org/licenses/by-nc-nd/4.0/).
+
+See the [LICENSE](LICENSE) file for full details.
 
 ---
 

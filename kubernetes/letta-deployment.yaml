@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: letta-server
+  namespace: omni-agents
+  labels:
+    app: letta-server
+    component: backend
+spec:
+  replicas: 1  # Letta server is stateful; use 1 replica
+  selector:
+    matchLabels:
+      app: letta-server
+  template:
+    metadata:
+      labels:
+        app: letta-server
+        component: backend
+    spec:
+      containers:
+      - name: letta
+        image: letta/letta:latest
+        ports:
+        - containerPort: 8283
+          name: http
+        env:
+        - name: LETTA_SERVER_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: omni-config
+              key: LETTA_SERVER_HOST
+        - name: LETTA_SERVER_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: omni-config
+              key: LETTA_SERVER_PORT
+        - name: ANTHROPIC_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: omni-secrets
+              key: anthropic-api-key
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: omni-secrets
+              key: openai-api-key
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1000m"
+          limits:
+            memory: "4Gi"
+            cpu: "2000m"
+        volumeMounts:
+        - name: letta-data
+          mountPath: /root/.letta
+        livenessProbe:
+          httpGet:
+            path: /v1/health
+            port: 8283
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /v1/health
+            port: 8283
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+      volumes:
+      - name: letta-data
+        persistentVolumeClaim:
+          claimName: letta-data-pvc
+      restartPolicy: Always

@@ -340,3 +340,195 @@ aws cloudwatch get-metric-statistics \
 ```
 
 ---
+
+## Kubernetes Deployment
+
+### Prerequisites
+
+- Kubernetes cluster (1.24+)
+- kubectl configured
+- Helm 3+ (optional, for package management)
+- Docker image pushed to container registry
+
+### Deployment Steps
+
+1. **Create namespace**
+   
+   ```bash
+   kubectl apply -f kubernetes/namespace.yaml
+   ```
+
+2. **Create secrets**
+   
+   ```bash
+   # Base64 encode your API keys
+   ANTHROPIC_KEY_B64=$(echo -n "sk-ant-your-key" | base64)
+   OPENAI_KEY_B64=$(echo -n "sk-your-key" | base64)
+   
+   # Copy template and replace placeholders
+   cp kubernetes/secrets.yaml.template kubernetes/secrets.yaml
+   sed -i "s/<BASE64_ENCODED_ANTHROPIC_KEY>/$ANTHROPIC_KEY_B64/g" kubernetes/secrets.yaml
+   sed -i "s/<BASE64_ENCODED_OPENAI_KEY>/$OPENAI_KEY_B64/g" kubernetes/secrets.yaml
+   
+   # Apply secrets
+   kubectl apply -f kubernetes/secrets.yaml
+   ```
+
+3. **Create ConfigMap**
+   
+   ```bash
+   kubectl apply -f kubernetes/configmap.yaml
+   ```
+
+4. **Create persistent volume**
+   
+   ```bash
+   kubectl apply -f kubernetes/persistent-volume.yaml
+   ```
+
+5. **Deploy Letta server**
+   
+   ```bash
+   kubectl apply -f kubernetes/letta-deployment.yaml
+   
+   # Wait for Letta server to be ready
+   kubectl wait --for=condition=ready pod \
+     -l app=letta-server \
+     -n omni-agents \
+     --timeout=180s
+   ```
+
+6. **Create services**
+   
+   ```bash
+   kubectl apply -f kubernetes/service.yaml
+   ```
+
+7. **Initialize agents**
+   
+   ```bash
+   # Run initialization job
+   kubectl run agent-init \
+     --image=your-registry/omni-multi-agent:latest \
+     --restart=Never \
+     --namespace=omni-agents \
+     --env="LETTA_SERVER_URL=http://letta-service:8283" \
+     -- python scripts/initialize_agents.py
+   
+   # Check logs
+   kubectl logs -f agent-init -n omni-agents
+   
+   # Get agent IDs and update secrets
+   kubectl get pod agent-init -n omni-agents -o jsonpath='{.status.containerStatuses[0].state.terminated.message}'
+   ```
+
+8. **Deploy agent services**
+   
+   ```bash
+   kubectl apply -f kubernetes/agent-deployment.yaml
+   ```
+
+9. **Set up ingress (optional)**
+   
+   ```bash
+   # Install nginx ingress controller (if not already installed)
+   helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+   helm install nginx-ingress ingress-nginx/ingress-nginx \
+     --namespace ingress-nginx \
+     --create-namespace
+   
+   # Apply ingress
+   kubectl apply -f kubernetes/ingress.yaml
+   ```
+
+### Verify Deployment
+
+```bash
+# Check all resources
+kubectl get all -n omni-agents
+
+# Check pod status
+kubectl get pods -n omni-agents
+
+# View logs
+kubectl logs -f deployment/letta-server -n omni-agents
+kubectl logs -f deployment/conversational-agent -n omni-agents
+
+# Check service endpoints
+kubectl get endpoints -n omni-agents
+
+# Port-forward for local testing
+kubectl port-forward svc/letta-service 8283:8283 -n omni-agents
+```
+
+### Scaling
+
+```bash
+# Scale agent deployment (if stateless)
+kubectl scale deployment conversational-agent \
+  --replicas=3 \
+  -n omni-agents
+
+# Horizontal Pod Autoscaler
+kubectl autoscale deployment conversational-agent \
+  --cpu-percent=70 \
+  --min=1 \
+  --max=10 \
+  -n omni-agents
+
+# View HPA status
+kubectl get hpa -n omni-agents
+```
+
+### Cloud-Specific Notes
+
+#### AWS EKS
+
+```bash
+# Create EKS cluster
+eksctl create cluster \
+  --name omni-cluster \
+  --region us-east-1 \
+  --nodegroup-name standard-workers \
+  --node-type t3.medium \
+  --nodes 2 \
+  --nodes-min 1 \
+  --nodes-max 4
+
+# Use EBS for persistent volumes
+kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/aws-ebs-csi-driver/master/deploy/kubernetes/base/ebs-csi-driver.yaml
+```
+
+#### GCP GKE
+
+```bash
+# Create GKE cluster
+gcloud container clusters create omni-cluster \
+  --zone us-central1-a \
+  --num-nodes 2 \
+  --machine-type n1-standard-2 \
+  --enable-autoscaling \
+  --min-nodes 1 \
+  --max-nodes 4
+
+# Get credentials
+gcloud container clusters get-credentials omni-cluster --zone us-central1-a
+```
+
+#### Azure AKS
+
+```bash
+# Create AKS cluster
+az aks create \
+  --resource-group omni-rg \
+  --name omni-cluster \
+  --node-count 2 \
+  --node-vm-size Standard_D2_v2 \
+  --enable-addons monitoring \
+  --generate-ssh-keys
+
+# Get credentials
+az aks get-credentials --resource-group omni-rg --name omni-cluster
+```
+
+---

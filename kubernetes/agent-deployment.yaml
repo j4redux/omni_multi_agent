@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: conversational-agent
+  namespace: omni-agents
+  labels:
+    app: conversational-agent
+    component: agent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: conversational-agent
+  template:
+    metadata:
+      labels:
+        app: conversational-agent
+        component: agent
+    spec:
+      initContainers:
+      # Wait for Letta server to be ready
+      - name: wait-for-letta
+        image: busybox:1.35
+        command:
+        - 'sh'
+        - '-c'
+        - |
+          until wget -q --spider http://letta-service:8283/v1/health; do
+            echo "Waiting for Letta server..."
+            sleep 5
+          done
+          echo "Letta server is ready"
+      containers:
+      - name: agent
+        image: your-registry/omni-multi-agent:latest  # Replace with your image
+        env:
+        - name: LETTA_SERVER_URL
+          valueFrom:
+            configMapKeyRef:
+              name: omni-config
+              key: LETTA_SERVER_URL
+        - name: ANTHROPIC_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: omni-secrets
+              key: anthropic-api-key
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: omni-secrets
+              key: openai-api-key
+        - name: CONVERSATIONAL_AGENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: omni-secrets
+              key: conversational-agent-id
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: omni-config
+              key: LOG_LEVEL
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        command: ["tail", "-f", "/dev/null"]  # Keep container running
+      restartPolicy: Always

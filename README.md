@@ -5,7 +5,7 @@
 [![Letta](https://img.shields.io/badge/Framework-Letta-purple.svg)](https://github.com/letta-ai/letta)
 [![Claude Sonnet 4.5](https://img.shields.io/badge/LLM-Claude%20Sonnet%204.5-orange.svg)](https://www.anthropic.com/claude)
 
-A sophisticated multi-agent orchestration system built with the [Letta framework](https://github.com/letta-ai/letta), demonstrating advanced agent engineering patterns and hierarchical task delegation.
+A multi-agent orchestration system built with the [Letta framework](https://github.com/letta-ai/letta) for hierarchical task delegation.
 
 ## Overview
 

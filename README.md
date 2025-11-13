@@ -31,20 +31,16 @@ graph TD
     Conv -.read-only.-> ProjectsMem[(Projects Memory)]
     Conv -.read-only.-> PrefsMem[(Preferences Memory)]
     
-    style User fill:#e1f5ff
-    style Conv fill:#b8e6ff
-    style Orch fill:#ffd6a5
-    style Tasks fill:#caffbf
-    style Projects fill:#caffbf
-    style Prefs fill:#caffbf
-    style Future fill:#e0e0e0,stroke-dasharray: 5 5
-    style TasksMem fill:#f0f0f0
-    style ProjectsMem fill:#f0f0f0
-    style PrefsMem fill:#f0f0f0
-    
-    classDef agent fill:#caffbf,stroke:#333,stroke-width:2px
-    classDef orchestrator fill:#ffd6a5,stroke:#333,stroke-width:2px
-    classDef interface fill:#b8e6ff,stroke:#333,stroke-width:2px
+    style User fill:#f8f9fa,stroke:#212529,stroke-width:3px,color:#000
+    style Conv fill:#e9ecef,stroke:#212529,stroke-width:3px,color:#000
+    style Orch fill:#dee2e6,stroke:#212529,stroke-width:3px,color:#000
+    style Tasks fill:#fff,stroke:#212529,stroke-width:2px,color:#000
+    style Projects fill:#fff,stroke:#212529,stroke-width:2px,color:#000
+    style Prefs fill:#fff,stroke:#212529,stroke-width:2px,color:#000
+    style Future fill:#f8f9fa,stroke:#6c757d,stroke-width:2px,stroke-dasharray: 5 5,color:#6c757d
+    style TasksMem fill:#495057,stroke:#212529,stroke-width:2px,color:#fff
+    style ProjectsMem fill:#495057,stroke:#212529,stroke-width:2px,color:#fff
+    style PrefsMem fill:#495057,stroke:#212529,stroke-width:2px,color:#fff
 ```
 
 **Key Components:**

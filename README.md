@@ -18,33 +18,39 @@ This project showcases a production-ready multi-agent architecture where special
 
 ## Architecture
 
+```mermaid
+graph TD
+    User[User Input] --> Conv[Conversational Agent]
+    Conv --> Orch[Orchestrator Agent]
+    Orch --> Tasks[Tasks Agent]
+    Orch --> Projects[Projects Agent]
+    Orch --> Prefs[Preferences Agent]
+    Orch --> Future[Future Agents]
+    
+    Conv -.read-only.-> TasksMem[(Tasks Memory)]
+    Conv -.read-only.-> ProjectsMem[(Projects Memory)]
+    Conv -.read-only.-> PrefsMem[(Preferences Memory)]
+    
+    style User fill:#e1f5ff
+    style Conv fill:#b8e6ff
+    style Orch fill:#ffd6a5
+    style Tasks fill:#caffbf
+    style Projects fill:#caffbf
+    style Prefs fill:#caffbf
+    style Future fill:#e0e0e0,stroke-dasharray: 5 5
+    style TasksMem fill:#f0f0f0
+    style ProjectsMem fill:#f0f0f0
+    style PrefsMem fill:#f0f0f0
+    
+    classDef agent fill:#caffbf,stroke:#333,stroke-width:2px
+    classDef orchestrator fill:#ffd6a5,stroke:#333,stroke-width:2px
+    classDef interface fill:#b8e6ff,stroke:#333,stroke-width:2px
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                         User Input                           │
-└─────────────────────────┬───────────────────────────────────┘
-                          │
-                          ▼
-┌─────────────────────────────────────────────────────────────┐
-│                  Conversational Agent                        │
-│  • Handles user interaction                                  │
-│  • Routes requests to orchestrator                           │
-│  • Provides read-only access to all memory blocks           │
-└─────────────────────────┬───────────────────────────────────┘
-                          │
-                          ▼
-┌─────────────────────────────────────────────────────────────┐
-│                   Orchestrator Agent                         │
-│  • Plans multi-step workflows                               │
-│  • Delegates to specialized agents                          │
-│  • Tracks request changelog                                 │
-└─────────────┬───────────┬───────────┬─────────────┬─────────┘
-              │           │           │             │
-              ▼           ▼           ▼             ▼
-       ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐
-       │  Tasks   │ │ Projects │ │Preferences│ │(Future)  │
-       │  Agent   │ │  Agent   │ │  Agent   │ │ Agents   │
-       └──────────┘ └──────────┘ └──────────┘ └──────────┘
-```
+
+**Key Components:**
+- **Conversational Agent**: Handles user interaction, routes requests, read-only access to all memory
+- **Orchestrator Agent**: Plans multi-step workflows, delegates to specialized agents, tracks changelog
+- **Specialized Agents**: Tasks, Projects, Preferences (with Future expansion capability)
 
 ### Agent Responsibilities
 
